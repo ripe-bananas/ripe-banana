@@ -1,10 +1,9 @@
 const connect = require('../lib/connect');
-const MONGODB_URI = global.__MONGO_URI__;
-// const MONGODB_URI = 'mongodb://localhost:27017/famous-cats-test';
+const TEST_DB_URL = 'mongodb://localhost:27017/ripebanana';
 const mongoose = require('mongoose');
 
 beforeAll(() => {
-  return connect(MONGODB_URI, { log: false });
+  return connect(TEST_DB_URL, { log: false });
 });
 
 afterAll(() => {

@@ -23,7 +23,8 @@ describe('studios api routes', () => {
       .then(({ body }) => {
         expect(body).toEqual({
           ...studio,
-          _id: expect.any(String)
+          _id: expect.any(String),
+          __v: 0
         });
       });
   });

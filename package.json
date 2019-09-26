@@ -35,7 +35,10 @@
     "supertest": "^4.0.2"
   },
   "jest": {
-    "preset": "@shelf/jest-mongodb"
+    "preset": "@shelf/jest-mongodb",
+    "setupFilesAfterEnv": [
+      "<rootDir>/e2e/setup.js"
+    ]
   },
   "prettier": {
     "singleQuote": true
