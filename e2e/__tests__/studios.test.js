@@ -47,6 +47,7 @@ describe('studios api routes', () => {
       });
   });
 
+  //Put films in
   it('gets a studio by id', () => {
     return postStudio(studio).then(savedStudio => {
       return request

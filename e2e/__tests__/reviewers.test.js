@@ -2,7 +2,6 @@ const request = require('../request');
 const db = require('../db');
 const { ObjectId } = require('mongoose').Types;
 
-
 describe.only('reviewers api routes', () => {
   beforeEach(() => {
     return db.dropCollection('reviewers');
@@ -60,9 +59,7 @@ describe.only('reviewers api routes', () => {
       postReviewer({ name: 'Sam Jesperson', company: 'Mazes USA' })
     ])
       .then(() => {
-        return request
-          .get('/api/reviewers')
-          .expect(200);
+        return request.get('/api/reviewers').expect(200);
       })
       .then(({ body }) => {
         expect(body.length).toBe(3);
@@ -74,26 +71,32 @@ describe.only('reviewers api routes', () => {
       .then(joe => {
         review.reviewer = joe._id;
         reviewTwo.reviewer = joe._id;
-        return Promise.all([
-          postReview(review),
-          postReview(reviewTwo)
-        ]);
+        return Promise.all([postReview(review), postReview(reviewTwo)]);
       })
-      .then((joe) => {
-        return request
-          .get(`/api/reviewers/${joe[0].reviewer}`)
-          .expect(200);
+      .then(joe => {
+        return request.get(`/api/reviewers/${joe[0].reviewer}`).expect(200);
       })
       .then(({ body }) => {
-        expect(body).toEqual('');
+        expect(body).toMatchInlineSnapshot(
+          {
+            _id: expect.any(String),
+            reviews: expect.any(Object)
+          },
+          `
+          Object {
+            "__v": 0,
+            "_id": Any<String>,
+            "company": "Peace Pies",
+            "name": "Joe Klause",
+            "reviews": Any<Object>,
+          }
+        `);
       });
-
-
   });
 
   it('updates a reviewer', () => {
     return postReviewer(reviewer)
-      .then((joe) => {
+      .then(joe => {
         return request
           .put(`/api/reviewers/${joe._id}`)
           .send({ company: 'Trumpets R Us' })

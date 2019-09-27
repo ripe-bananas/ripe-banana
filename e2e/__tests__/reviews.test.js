@@ -59,39 +59,6 @@ describe('reviews api routes', () => {
       });
   });
 
-  // it('gets review by id', () => {
-  //   return postReview(review)
-  //     .then((joe) => {
-  //       return request
-  //         .get(`/api/reviews/${joe._id}`)
-  //         .expect(200);
-  //     })
-  //     .then(({ body }) => {
-  //       expect(body).toEqual({
-  //         ...review,
-  //         _id: expect.any(String),
-  //         __v: 0
-  //       });
-  //     });
-
-
-  // });
-
-  // it('updates a review', () => {
-  //   return postReview(review)
-  //     .then((joe) => {
-  //       return request
-  //         .put(`/api/reviews/${joe._id}`)
-  //         .send({ company: 'Trumpets R Us' })
-  //         .expect(200);
-  //     })
-  //     .then(({ body }) => {
-  //       expect(body).toEqual({
-  //         ...review,
-  //         _id: expect.any(String),
-  //         __v: 0,
-  //         company: 'Trumpets R Us'
-  //       });
-  //     });
-  // });
+  //Delete test
+  
 });
