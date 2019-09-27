@@ -8,7 +8,8 @@ describe.only('reviewers api routes', () => {
       db.dropCollection('reviewers'),
       db.dropCollection('reviews'),
       db.dropCollection('actors'),
-      db.dropCollection('studios')
+      db.dropCollection('studios'),
+      db.dropCollection('films')
     ]);
   });
 
@@ -36,6 +37,13 @@ describe.only('reviewers api routes', () => {
     studio: {},
     released: 2015,
     cast: [{ role: 'The Oil Man' }, { role: 'Pastoral Boy' }]
+  };
+
+  const filmTwo = {
+    title: 'There Wasn\'t Blood',
+    studio: {},
+    released: 2015,
+    cast: [{ role: 'The Oil Woman' }, { role: 'Pastoral Boy' }]
   };
 
   const studio = {
@@ -81,7 +89,6 @@ describe.only('reviewers api routes', () => {
         film.cast[0]._id = actor._id;
         film.cast[1].actor = actor2._id;
         film.cast[1]._id = actor2._id;
-        console.log(film);
         return request
           .post('/api/films')
           .send(film)
@@ -100,27 +107,40 @@ describe.only('reviewers api routes', () => {
 
   it('posts a film', () => {
     return postFilm(film).then(joe => {
-      expect(joe).toMatchInlineSnapshot(`
+      expect(joe).toMatchInlineSnapshot(
+        {
+          _id: expect.any(String),
+          cast: expect.any(Array),
+          studio: expect.any(String)
+        },
+        `
         Object {
           "__v": 0,
-          "_id": "5d8e9bb77854d90c2192351a",
-          "cast": Array [
-            Object {
-              "_id": "5d8e9bb77854d90c21923518",
-              "actor": "5d8e9bb77854d90c21923518",
-              "role": "The Oil Man",
-            },
-            Object {
-              "_id": "5d8e9bb77854d90c21923519",
-              "actor": "5d8e9bb77854d90c21923519",
-              "role": "Pastoral Boy",
-            },
-          ],
+          "_id": Any<String>,
+          "cast": Any<Array>,
           "released": 2015,
-          "studio": "5d8e9bb77854d90c21923517",
+          "studio": Any<String>,
           "title": "There Will Be Blood",
         }
       `);
     });
   });
+
+  it('gets all films', () => {
+    return Promise.all([
+      postFilm(film),
+      postFilm(filmTwo)
+    ])
+      .then(() => {
+        return request
+          .get('/api/films')
+          .expect(200);
+      })
+      .then(({ body }) => {
+        console.log(body);
+        expect(body.length).toBe(2);
+      });
+  });
+
+
 });
