@@ -35,7 +35,7 @@ describe.only('reviewers api routes', () => {
     title: 'There Will Be Blood',
     studio: {},
     released: 2015,
-    cast: [{ role: 'The Oil Man', actor: {} }, { role: 'Pastoral Boy', actor: {} }]
+    cast: [{ role: 'The Oil Man' }, { role: 'Pastoral Boy' }]
   };
 
   const studio = {
@@ -75,15 +75,19 @@ describe.only('reviewers api routes', () => {
       postActor(actor),
       postActor({ name: 'Sam Jesperson' })
     ])
-      .then(result => {
-        console.log(result);
+      .then(([studio, actor, actor2]) => {
+        film.studio = studio._id;
+        film.cast[0].actor = actor._id;
+        film.cast[0]._id = actor._id;
+        film.cast[1].actor = actor2._id;
+        film.cast[1]._id = actor2._id;
         console.log(film);
-      });
-    // return request
-    //   .post('/api/films')
-    //   .send(reviewer)
-    //   .expect(200)
-    //   .then(({ body }) => body);
+        return request
+          .post('/api/films')
+          .send(film)
+          .expect(200);
+      })
+      .then(({ body }) => body);
   }
 
   // function postReview(review) {
@@ -94,14 +98,29 @@ describe.only('reviewers api routes', () => {
   //     .then(({ body }) => body);
   // }
 
-  postFilm(film);
-
-  // it('posts a file', () => {
-  //   return postReviewer(reviewer).then(joe => {
-  //     expect(joe).toEqual({
-  //       ...reviewer,
-  //       _id: expect.any(String),
-  //       __v: 0
-  //     });
-  //   });
+  it('posts a film', () => {
+    return postFilm(film).then(joe => {
+      expect(joe).toMatchInlineSnapshot(`
+        Object {
+          "__v": 0,
+          "_id": "5d8e9bb77854d90c2192351a",
+          "cast": Array [
+            Object {
+              "_id": "5d8e9bb77854d90c21923518",
+              "actor": "5d8e9bb77854d90c21923518",
+              "role": "The Oil Man",
+            },
+            Object {
+              "_id": "5d8e9bb77854d90c21923519",
+              "actor": "5d8e9bb77854d90c21923519",
+              "role": "Pastoral Boy",
+            },
+          ],
+          "released": 2015,
+          "studio": "5d8e9bb77854d90c21923517",
+          "title": "There Will Be Blood",
+        }
+      `);
+    });
+  });
 });
