@@ -8,7 +8,6 @@ describe('actors api routes', () => {
 
   const actor = {
     name: 'Timothee Chalamet',
-    dob: new Date('December 27, 1995'),
     pob: 'New York'
   };
 
@@ -30,5 +29,18 @@ describe('actors api routes', () => {
     });
   });
 
-  
+  it('gets all actors', () => {
+    return Promise.all([
+      postActor(actor),
+      postActor({ name: 'Brad Pitt' }),
+      postActor({ name: 'Sam Jesperson' })
+    ])
+      .then(() => {
+        return request.get('/api/actors').expect(200);
+      })
+      .then(({ body }) => {
+        console.log(body);
+        expect(body.length).toBe(3);
+      });
+  });
 });
