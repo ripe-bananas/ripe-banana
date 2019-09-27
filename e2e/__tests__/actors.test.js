@@ -36,11 +36,30 @@ describe('actors api routes', () => {
       postActor({ name: 'Sam Jesperson' })
     ])
       .then(() => {
-        return request.get('/api/actors').expect(200);
+        return request
+          .get('/api/actors')
+          .expect(200);
       })
       .then(({ body }) => {
-        console.log(body);
         expect(body.length).toBe(3);
       });
+  });
+
+  it('gets actor by id', () => {
+    return postActor(actor)
+      .then((tim) => {
+        return request
+          .get(`/api/actors/${tim._id}`)
+          .expect(200);
+      })
+      .then(({ body }) => {
+        expect(body).toEqual({
+          ...actor,
+          _id: expect.any(String),
+          __v: 0
+        });
+      });
+
+
   });
 });
