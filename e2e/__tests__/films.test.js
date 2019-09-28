@@ -13,24 +13,24 @@ describe.only('reviewers api routes', () => {
     ]);
   });
 
-  // const reviewer = {
-  //   name: 'Joe Klause',
-  //   company: 'Peace Pies'
-  // };
+  const reviewer = {
+    name: 'Joe Klause',
+    company: 'Peace Pies'
+  };
 
-  // const review = {
-  //   rating: 5,
-  //   reviewer: {},
-  //   review: 'Really good movie!',
-  //   film: new ObjectId()
-  // };
+  const review = {
+    rating: 5,
+    reviewer: {},
+    review: 'Really good movie!',
+    film: {}
+  };
 
-  // const reviewTwo = {
-  //   rating: 2,
-  //   reviewer: {},
-  //   review: 'Really really really good movie!',
-  //   film: new ObjectId()
-  // };
+  const reviewTwo = {
+    rating: 2,
+    reviewer: {},
+    review: 'Really really really good movie!',
+    film: {}
+  };
 
   const film = {
     title: 'There Will Be Blood',
@@ -97,13 +97,28 @@ describe.only('reviewers api routes', () => {
       .then(({ body }) => body);
   }
 
-  // function postReview(review) {
-  //   return request
-  //     .post('/api/reviews')
-  //     .send(review)
-  //     .expect(200)
-  //     .then(({ body }) => body);
-  // }
+  function postReviews(review, reviewTwo) {
+    return postReviewer(reviewer)
+      .then(reviewer => {
+        review.reviewer = reviewer._id;
+        reviewTwo.reviewer = reviewer._id;
+        return request
+          .post('/api/reviews')
+          .send(review)
+          .expect(200)
+          .send(reviewTwo)
+          .expect(200);
+      })
+      .then(({ body }) => body);
+  }
+
+  function postReviewer(reviewer) {
+    return request
+      .post('/api/reviewers')
+      .send(reviewer)
+      .expect(200)
+      .then(({ body }) => body);
+  }
 
   it('posts a film', () => {
     return postFilm(film).then(joe => {
@@ -137,10 +152,24 @@ describe.only('reviewers api routes', () => {
           .expect(200);
       })
       .then(({ body }) => {
-        console.log(body);
         expect(body.length).toBe(2);
       });
   });
 
+  it('gets a film by id', () => {
+    return postFilm(film)
+      .then(postedFilm => {
+        review.film = postedFilm._id;
+        reviewTwo.film = postedFilm._id;
+        return postReviews(review, reviewTwo);
+      })
+      .then(review => {
+        return request
+          .get(`/api/films/${review.film}`)
+          .expect(200);
+      })
+      .then(({ body }) => { console.log(body.cast[0].actor); });
+
+  });
 
 });
