@@ -40,7 +40,7 @@ describe.only('reviewers api routes', () => {
   };
 
   const filmTwo = {
-    title: 'There Wasn\'t Blood',
+    title: "There Wasn't Blood",
     studio: {},
     released: 2015,
     cast: [{ role: 'The Oil Woman' }, { role: 'Pastoral Boy' }]
@@ -137,19 +137,15 @@ describe.only('reviewers api routes', () => {
           "studio": Any<String>,
           "title": "There Will Be Blood",
         }
-      `);
+      `
+      );
     });
   });
 
   it('gets all films', () => {
-    return Promise.all([
-      postFilm(film),
-      postFilm(filmTwo)
-    ])
+    return Promise.all([postFilm(film), postFilm(filmTwo)])
       .then(() => {
-        return request
-          .get('/api/films')
-          .expect(200);
+        return request.get('/api/films').expect(200);
       })
       .then(({ body }) => {
         expect(body.length).toBe(2);
@@ -164,12 +160,27 @@ describe.only('reviewers api routes', () => {
         return postReviews(review, reviewTwo);
       })
       .then(review => {
-        return request
-          .get(`/api/films/${review.film}`)
-          .expect(200);
+        return request.get(`/api/films/${review.film}`).expect(200);
       })
-      .then(({ body }) => { console.log(body.cast[0].actor); });
-
+      .then(({ body }) => {
+        expect(body).toMatchInlineSnapshot(
+          {
+            _id: expect.any(String),
+            cast: expect.any(Array),
+            reviews: expect.any(Array),
+            studio: expect.any(Object)
+          },
+          `
+          Object {
+            "__v": 0,
+            "_id": Any<String>,
+            "cast": Any<Array>,
+            "released": 2015,
+            "reviews": Any<Array>,
+            "studio": Any<Object>,
+            "title": "There Will Be Blood",
+          }
+        `);
+      });
   });
-
 });
