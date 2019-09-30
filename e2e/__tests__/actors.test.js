@@ -112,7 +112,7 @@ describe('actors api routes', () => {
       });
   });
 
-  
+
   it('gets actor by id', () => {
     return postFilm(film, filmTwo)
       .then(() => {
@@ -134,7 +134,34 @@ describe('actors api routes', () => {
           __v: 0
         });
       });
+  });
 
+  it('throws error if actor is in film', () => {
+    return postFilm(film, filmTwo)
+      .then(() => {
+        return request
+          .get('/api/films');
+      })
+      .then(({ body }) => {
+        return request
+          .delete(`/api/actors/${body[0].cast[0].actor}`)
+          .expect(500);
+      });
+  });
 
+  it('deletes actor who isn\'t in films', () => {
+    return postActor(actor)
+      .then((actor) => {
+        return request
+          .delete(`/api/actors/${actor._id}`)
+          .expect(200);
+      })
+      .then(() => {
+        return request
+          .get('/api/actors');
+      })
+      .then(({ body }) => {
+        expect(body.length).toBe(0);
+      });
   });
 });

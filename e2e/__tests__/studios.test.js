@@ -134,6 +134,21 @@ describe('studios api routes', () => {
           .expect(500);
 
       });
+  });
 
+  it('deletes a studio', () => {
+    return postStudio(studio)
+      .then(studio => {
+        return request
+          .delete(`/api/studios/${studio._id}`)
+          .expect(200);
+      })
+      .then(() => {
+        return request
+          .get('/api/studios');
+      })
+      .then(({ body }) => {
+        expect(body.length).toBe(0);
+      });
   });
 });
