@@ -57,18 +57,14 @@ describe('actors api routes', () => {
         film.studio = studio._id;
 
         film.cast[0].actor = actor._id;
-        // film.cast[0]._id = actor._id;
 
         film.cast[1].actor = actor2._id;
-        // film.cast[1]._id = actor2._id;
 
         filmTwo.studio = studio._id;
 
         filmTwo.cast[0].actor = actor._id;
-        // filmTwo.cast[0]._id = actor._id;
 
         filmTwo.cast[1].actor = actor2._id;
-        // filmTwo.cast[1]._id = actor2._id;
         return Promise.all([
           request
             .post('/api/films')
@@ -116,21 +112,7 @@ describe('actors api routes', () => {
       });
   });
 
-  it('posts two films', () => {
-    return postFilm(film, filmTwo)
-      .then(() => {
-        return request
-          .get('/api/films')
-          .expect(200);
-      })
-      .then(({ body }) => {
-        // console.log(body[0].cast);
-        console.log(body[0].cast);
-        console.log(body[1].cast);
-        expect(body.length).toBe(2);
-      });
-  });
-
+  
   it('gets actor by id', () => {
     return postFilm(film, filmTwo)
       .then(() => {
@@ -138,10 +120,9 @@ describe('actors api routes', () => {
           .get('/api/films')
           .expect(200);
       })
-      .then((films) => {
-        console.log(films);
+      .then(({ body }) => {
         return request
-          .get(`/api/actors/${films[0].cast[0].actor}`)
+          .get(`/api/actors/${body[0].cast[0].actor}`)
           .expect(200);
       })
       .then(({ body }) => {

@@ -1,9 +1,13 @@
 const request = require('../request');
 const db = require('../db');
+const { ObjectId } = require('mongoose').Types;
 
 describe('studios api routes', () => {
   beforeEach(() => {
-    return db.dropCollection('studios');
+    return Promise.all([
+      db.dropCollection('studios'),
+      db.dropCollection('films')
+    ]);
   });
 
   const studio = {
@@ -15,10 +19,38 @@ describe('studios api routes', () => {
     }
   };
 
+  const film = {
+    title: 'There Will Be Blood',
+    studio: {},
+    released: 2015,
+    cast: [
+      { role: 'The Oil Man', actor: new ObjectId() },
+      { role: 'Pastoral Boy', actor: new ObjectId() }
+    ]
+  };
+
+  const filmTwo = {
+    title: "There Wasn't Blood",
+    studio: {},
+    released: 2015,
+    cast: [
+      { role: 'The Oil Woman', actor: new ObjectId() },
+      { role: 'Pastoral Boy', actor: new ObjectId() }
+    ]
+  };
+
   function postStudio(studio) {
     return request
       .post('/api/studios')
       .send(studio)
+      .expect(200)
+      .then(({ body }) => body);
+  }
+
+  function postFilm(film) {
+    return request
+      .post('/api/films')
+      .send(film)
       .expect(200)
       .then(({ body }) => body);
   }
@@ -49,28 +81,41 @@ describe('studios api routes', () => {
 
   //Put films in
   it('gets a studio by id', () => {
-    return postStudio(studio).then(savedStudio => {
-      return request
-        .get(`/api/studios/${savedStudio._id}`)
-        .expect(200)
-        .then(({ body }) => {
-          expect(body).toMatchInlineSnapshot(
-            {
-              _id: expect.any(String)
-            },
-            `
-            Object {
-              "__v": 0,
-              "_id": Any<String>,
-              "address": Object {
-                "city": "Emeryville",
-                "country": "USA",
-                "state": "CA",
+    return postStudio(studio)
+      .then(savedStudio => {
+        film.studio = savedStudio._id;
+        filmTwo.studio = savedStudio._id;
+      })
+      .then(() => {
+        return Promise.all([postFilm(film), postFilm(filmTwo)]);
+      })
+      .then(body => {
+        return request
+          .get(`/api/studios/${body[0].studio}`)
+          .expect(200)
+          .then(({ body }) => {
+            expect(body).toMatchInlineSnapshot(
+              {
+                ...body,
+                __v: 0,
+                _id: expect.any(String),
+                films: expect.any(Array)
               },
-              "name": "Pixar",
-            }
-          `);
-        });
-    });
+              `
+              Object {
+                "__v": 0,
+                "_id": Any<String>,
+                "address": Object {
+                  "city": "Emeryville",
+                  "country": "USA",
+                  "state": "CA",
+                },
+                "films": Any<Array>,
+                "name": "Pixar",
+              }
+            `
+            );
+          });
+      });
   });
 });
