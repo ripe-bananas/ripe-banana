@@ -15,16 +15,32 @@ describe.only('reviewers api routes', () => {
   const review = {
     rating: 5,
     reviewer: {},
-    review: 'Really good movie!',
-    film: new ObjectId()
+    review: 'Really good movie!'
   };
 
   const reviewTwo = {
     rating: 2,
     reviewer: {},
-    review: 'Really really really good movie!',
-    film: new ObjectId()
+    review: 'Really really really good movie!'
   };
+
+  const film = {
+    title: 'There Will Be Blood',
+    studio: new ObjectId(),
+    released: 2015,
+    cast: [
+      { role: 'The Oil Man', actor: new ObjectId() },
+      { role: 'Pastoral Boy', actor: new ObjectId() }
+    ]
+  };
+
+  function postFilm(film) {
+    return request
+      .post('/api/films')
+      .send(film)
+      .expect(200)
+      .then(({ body }) => body);
+  }
 
   function postReviewer(reviewer) {
     return request
@@ -67,28 +83,31 @@ describe.only('reviewers api routes', () => {
   });
 
   it('gets reviewer by id', () => {
-    return postReviewer(reviewer)
-      .then(joe => {
+    return Promise.all([postReviewer(reviewer), postFilm(film)])
+      .then(([joe, film]) => {
         review.reviewer = joe._id;
+        review.film = film._id;
         reviewTwo.reviewer = joe._id;
+        reviewTwo.film = film._id;
+
         return Promise.all([postReview(review), postReview(reviewTwo)]);
       })
-      .then(joe => {
-        return request.get(`/api/reviewers/${joe[0].reviewer}`).expect(200);
+      .then(reviews => {
+        return request.get(`/api/reviewers/${reviews[0].reviewer}`).expect(200);
       })
       .then(({ body }) => {
-        expect(body).toMatchInlineSnapshot(
-          {
-            _id: expect.any(String),
-            reviews: expect.any(Object)
-          },
-          `
+        expect(body).toMatchInlineSnapshot({
+          __v: 0,
+          _id: expect.any(String),
+          reviews: expect.any(Array),
+        },
+        `
           Object {
             "__v": 0,
             "_id": Any<String>,
             "company": "Peace Pies",
             "name": "Joe Klause",
-            "reviews": Any<Object>,
+            "reviews": Any<Array>,
           }
         `);
       });
