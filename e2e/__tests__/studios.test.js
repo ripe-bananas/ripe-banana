@@ -79,7 +79,6 @@ describe('studios api routes', () => {
       });
   });
 
-  //Put films in
   it('gets a studio by id', () => {
     return postStudio(studio)
       .then(savedStudio => {
@@ -117,5 +116,24 @@ describe('studios api routes', () => {
             );
           });
       });
+  });
+
+  it('throws an error when deleting a studio with films', () => {
+    return postStudio(studio)
+      .then(savedStudio => {
+        film.studio = savedStudio._id;
+        filmTwo.studio = savedStudio._id;
+      })
+      .then(() => {
+        return Promise.all([postFilm(film), postFilm(filmTwo)]);
+      })
+      .then(body => {
+
+        return request
+          .delete(`/api/studios/${body[0].studio}`)
+          .expect(500);
+
+      });
+
   });
 });

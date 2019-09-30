@@ -160,7 +160,9 @@ describe.only('reviewers api routes', () => {
         return postReviews(review, reviewTwo);
       })
       .then(review => {
-        return request.get(`/api/films/${review.film}`).expect(200);
+        return request
+          .get(`/api/films/${review.film}`)
+          .expect(200);
       })
       .then(({ body }) => {
         expect(body).toMatchInlineSnapshot(
@@ -181,6 +183,26 @@ describe.only('reviewers api routes', () => {
             "title": "There Will Be Blood",
           }
         `);
+      });
+  });
+
+  it('deletes a film', () => {
+    return Promise.all([
+      postFilm(film),
+      postFilm(filmTwo)
+    ])
+      .then((films) => {
+        return request
+          .delete(`/api/films/${films[0]._id}`)
+          .expect(200);
+      })
+      .then(() => {
+        return request
+          .get('/api/films')
+          .expect(200);
+      })
+      .then(({ body }) => {
+        expect(body.length).toBe(1);
       });
   });
 });
