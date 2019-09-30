@@ -3,11 +3,16 @@ const db = require('../db');
 
 describe('actors api routes', () => {
   beforeEach(() => {
-    return db.dropCollection('actors');
+    return Promise.all([
+      db.dropCollection('actors'),
+      db.dropCollection('films'),
+      db.dropCollection('studios')
+    ]);
   });
 
   const actor = {
     name: 'Timothee Chalamet',
+    dob: new Date('December 19, 1995'),
     pob: 'New York'
   };
 
@@ -42,7 +47,7 @@ describe('actors api routes', () => {
       .then(({ body }) => body);
   }
 
-  function postFilm(film) {
+  function postFilm(film, filmTwo) {
     return Promise.all([
       postStudio(studio),
       postActor(actor),
@@ -50,16 +55,30 @@ describe('actors api routes', () => {
     ])
       .then(([studio, actor, actor2]) => {
         film.studio = studio._id;
+
         film.cast[0].actor = actor._id;
-        film.cast[0]._id = actor._id;
+        // film.cast[0]._id = actor._id;
+
         film.cast[1].actor = actor2._id;
-        film.cast[1]._id = actor2._id;
-        return request
-          .post('/api/films')
-          .send(film)
-          .expect(200);
-      })
-      .then(({ body }) => body);
+        // film.cast[1]._id = actor2._id;
+
+        filmTwo.studio = studio._id;
+
+        filmTwo.cast[0].actor = actor._id;
+        // filmTwo.cast[0]._id = actor._id;
+
+        filmTwo.cast[1].actor = actor2._id;
+        // filmTwo.cast[1]._id = actor2._id;
+        return Promise.all([
+          request
+            .post('/api/films')
+            .send(film),
+          request
+            .post('/api/films')
+            .send(filmTwo)
+
+        ]);
+      });
   }
 
   function postActor(actor) {
@@ -74,8 +93,9 @@ describe('actors api routes', () => {
     return postActor(actor).then(tim => {
       expect(tim).toEqual({
         ...actor,
+        __v: 0,
         _id: expect.any(String),
-        __v: 0
+        dob: expect.any(String),
       });
     });
   });
@@ -96,19 +116,39 @@ describe('actors api routes', () => {
       });
   });
 
-  it('gets actor by id', () => {
-    return Promise.all([
-      postFilm(film),
-      postFilm(filmTwo)
-    ])
-      .then((films) => {
+  it('posts two films', () => {
+    return postFilm(film, filmTwo)
+      .then(() => {
         return request
-          .get(`/api/actors/${films[0].cast[0]._id}`)
+          .get('/api/films')
+          .expect(200);
+      })
+      .then(({ body }) => {
+        // console.log(body[0].cast);
+        console.log(body[0].cast);
+        console.log(body[1].cast);
+        expect(body.length).toBe(2);
+      });
+  });
+
+  it('gets actor by id', () => {
+    return postFilm(film, filmTwo)
+      .then(() => {
+        return request
+          .get('/api/films')
+          .expect(200);
+      })
+      .then((films) => {
+        console.log(films);
+        return request
+          .get(`/api/actors/${films[0].cast[0].actor}`)
           .expect(200);
       })
       .then(({ body }) => {
         expect(body).toEqual({
           ...actor,
+          dob: expect.any(String),
+          films: expect.any(Array),
           _id: expect.any(String),
           __v: 0
         });
