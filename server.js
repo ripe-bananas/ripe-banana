@@ -1,7 +1,7 @@
 // loads the .env environment variables
 require('dotenv').config();
 // connect to mongo
-require('./lib/connect')('mongodb://heroku_1zlqzd9z:ra6pjkrb7m53t9md464448ikgk@ds227808.mlab.com:27808/heroku_1zlqzd9z');
+require('./lib/connect')(process.env.MONGODB_URI);
 
 // require the app http event handler
 const app = require('./lib/app');
